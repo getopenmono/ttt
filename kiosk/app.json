@@ -1,0 +1,15 @@
+{ "name":"tictactoe"
+, "author":"Jens Peter Secher"
+, "license":"MIT"
+, "website":"developer.openmono.com"
+, "headline":"The classic 3x3 board game."
+, "description":[
+	"Play with a fun and exciting game with against another player.",
+	"Can you beat your best friend in the most classic of board games?"
+  ]
+, "binary":"dummy.elf"
+, "url":"https://github.com/getopenmono/monoprog"
+, "required":["touch","buzzer"]
+, "screenshots":["tic-tac-toe-part1.png"]
+, "kioskapi": 1
+}
