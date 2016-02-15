@@ -7,9 +7,10 @@
 	"Play with a fun and exciting game with against another player.",
 	"Can you beat your best friend in the most classic of board games?"
   ]
-, "binary":"dummy.elf"
+, "binary":"ttt.elf"
 , "url":"https://github.com/getopenmono/monoprog"
-, "required":["touch","buzzer"]
-, "screenshots":["tic-tac-toe-part1.png"]
+, "required":["display","touch"]
+, "optional":[]
+, "screenshots":["tic-tac-toe-part2.png","tic-tac-toe-part1.png","tic-tac-toe-part3.png"]
 , "kioskapi": 1
 }
