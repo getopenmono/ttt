@@ -23,14 +23,15 @@ class AppController
 	public mono::IApplication
 {
 public:
+	enum Token { _, X, O };
 	AppController ();
 	void monoWakeFromReset ();
 	void monoWillGotoSleep ();
 	void monoWakeFromSleep ();
-	enum Token { _, X, O };
-	Token board[3][3];
 	void humanMoved (uint8_t x, uint8_t y);
+	Token board[3][3];
 private:
+	mono::Timer timer;
 	mono::ui::TextLabelView topLabel;
 	TouchField fields[3][3];
 	Token nextToMove;
@@ -38,9 +39,11 @@ private:
 	void startNewGame ();
 	void updateView ();
 	void continueGame ();
+	void autoMove ();
 	void whosMove ();
 	Token winner ();
 	bool hasWinner ();
+	void prepareNewGame ();
 };
 
 #endif // __ttt_appcontroller_h

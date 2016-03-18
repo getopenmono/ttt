@@ -5,6 +5,7 @@
 using mono::geo::Point;
 using mono::geo::Rect;
 using mono::String;
+using mono::Timer;
 using mono::TouchEvent;
 using mono::ui::TextLabelView;
 using mono::ui::View;
@@ -21,13 +22,13 @@ void TouchField::repaint ()
 		case AppController::X:
 		{
 			painter.drawLine(Position(),Point(viewRect.X2(),viewRect.Y2()));
-			painter.drawLine(Point(viewRect.X2(),viewRect.Y()),Point(viewRect.X(),viewRect.Y2()));
+			painter.drawLine(Point(viewRect.X2(),Position().Y()),Point(Position().X(),viewRect.Y2()));
 			break;
 		}
 		case AppController::O:
 		{
 			uint16_t radius = viewRect.Size().Width() / 2;
-			painter.drawCircle(viewRect.X()+radius,viewRect.Y()+radius,radius);
+			painter.drawCircle(Position().X()+radius,Position().Y()+radius,radius);
 			break;
 		}
 		default:
@@ -42,7 +43,8 @@ void TouchField::TouchBegin (TouchEvent & event)
 
 AppController::AppController ()
 :
-	topLabel(Rect(0,10,View::DisplayWidth(),20),"Tic Tac Toe")
+	timer(1500),
+	topLabel(Rect(0,15,176,20),"Tic Tac Toe")
 {
 	topLabel.setAlignment(TextLabelView::ALIGN_CENTER);
 }
@@ -60,6 +62,7 @@ void AppController::monoWakeFromSleep ()
 
 void AppController::monoWillGotoSleep ()
 {
+	timer.Stop();
 }
 
 void AppController::startNewGame ()
@@ -69,12 +72,12 @@ void AppController::startNewGame ()
 		for (uint8_t y = 0; y < 3; ++y)
 			board[y][x] = _;
 	// Setup touch fields.
-	const uint8_t width = View::DisplayWidth();
-	const uint8_t height = View::DisplayHeight();
+	const uint8_t screenHeight = 220;
+	const uint8_t screenWidth = 176;
 	const uint8_t fieldSize = 50;
 	const uint8_t fieldSeparation = 8;
-	const uint8_t screenMargin = (width-(3*fieldSize+2*fieldSeparation))/2;
-	uint8_t yOffset = height-width-(fieldSeparation-screenMargin);
+	const uint8_t screenMargin = (screenWidth-(3*fieldSize+2*fieldSeparation))/2;
+	uint8_t yOffset = screenHeight-screenWidth-(fieldSeparation-screenMargin);
 	for (uint8_t y = 0; y < 3; ++y)
 	{
 		yOffset += fieldSeparation;
@@ -101,15 +104,30 @@ void AppController::continueGame ()
 {
 	updateView();
 	whosMove();
- 	if (hasWinner())
- 	{
-		if (winner() == X) topLabel.setText("X wins!");
-		else topLabel.setText("O wins!");
+	if (hasWinner())
+	{
+		if (winner() == X) topLabel.setText("You win!");
+		else topLabel.setText("Mono wins!");
+		timer.setCallback<AppController>(this,&AppController::prepareNewGame);
+		timer.Start();
 	}
-	else if (nextToMove == _) topLabel.setText("Tie!");
-	else if (nextToMove == X) topLabel.setText("X to move");
-	else topLabel.setText("O to move");
-	topLabel.show();
+	else if (nextToMove == _)
+	{
+		topLabel.setText("Tie!");
+		timer.setCallback<AppController>(this,&AppController::prepareNewGame);
+		timer.Start();
+	}
+	else if (nextToMove == X)
+	{
+		topLabel.setText("Your move");
+		topLabel.show();
+	}
+	else
+	{
+		topLabel.setText("Thinking...");
+		timer.setCallback<AppController>(this,&AppController::autoMove);
+		timer.Start();
+	}
 }
 
 void AppController::updateView ()
@@ -157,8 +175,8 @@ bool AppController::hasWinner ()
 void AppController::humanMoved (uint8_t x, uint8_t y)
 {
 	if (nextToMove == _ || hasWinner()) return startNewGame();
-	else if (board[y][x] != _) return;
-	else board[y][x] = nextToMove;
+	else if (nextToMove != X || board[y][x] != _) return;
+	board[y][x] = X;
 	continueGame();
 }
 
@@ -173,4 +191,45 @@ void AppController::whosMove ()
 	if (xPieces + oPieces >= 9) nextToMove = _;
 	else if (xPieces <= oPieces) nextToMove = X;
 	else nextToMove = O;
+}
+
+void AppController::autoMove ()
+{
+	timer.Stop();
+	// Play to win, if possible.
+	for (uint8_t x = 0; x < 3; ++x)
+		for (uint8_t y = 0; y < 3; ++y)
+			if (board[y][x] == _)
+			{
+				board[y][x] = O;
+				if (hasWinner()) return continueGame();
+				else board[y][x] = _;
+			}
+	// Play to not loose.
+	for (uint8_t x = 0; x < 3; ++x)
+		for (uint8_t y = 0; y < 3; ++y)
+			if (board[y][x] == _)
+			{
+				board[y][x] = X;
+				if (hasWinner())
+				{
+					board[y][x] = O;
+					return continueGame();
+				}
+				else board[y][x] = _;
+			}
+	// Play where free.
+	for (uint8_t x = 0; x < 3; ++x)
+		for (uint8_t y = 0; y < 3; ++y)
+			if (board[y][x] == _)
+			{
+				board[y][x] = O;
+				return continueGame();
+			}
+}
+
+void AppController::prepareNewGame ()
+{
+	timer.Stop();
+	topLabel.setText("Play again?");
 }

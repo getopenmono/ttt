@@ -376,3 +376,7 @@ void AppController::monoWakeFromSleep ()
 ```
 
 Well there you have it: An astonishing, revolutionary, new game has been born!  Now your job is to type it all in.
+
+## Ready for some more?
+
+Check out the [second part](README2.md) of this tutorial.
