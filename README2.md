@@ -87,7 +87,7 @@ Conceptually, I can simply tell `timer` to call a function `autoMove` by
 timer.setCallBack(autoMove);
 ```
 but because `autoMove` is a C++ class member-function, I need to help out the poor old C++ compiler by giving it information about which object has the
-`autoMove` function, so the incantation will actually be actually
+`autoMove` function, so the incantation will actually be
 ```cpp
 timer.setCallback<AppController>(this,&AppController::autoMove);
 ```
