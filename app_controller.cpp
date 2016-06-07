@@ -2,13 +2,20 @@
 // Released under the MIT license, see LICENSE.txt
 #include "app_controller.h"
 
+using mono::display::IDisplayController;
 using mono::geo::Point;
 using mono::geo::Rect;
+using mono::IApplicationContext;
 using mono::String;
 using mono::Timer;
 using mono::TouchEvent;
 using mono::ui::TextLabelView;
 using mono::ui::View;
+
+namespace
+{
+	static const int dimBrightness = 50;
+};
 
 void TouchField::repaint ()
 {
@@ -44,8 +51,12 @@ void TouchField::TouchBegin (TouchEvent & event)
 AppController::AppController ()
 :
 	timer(1500),
+	dimmer(30*1000,true),
+	sleeper(30*1000,true),
 	topLabel(Rect(0,15,176,20),"Tic Tac Toe")
 {
+	dimmer.setCallback<AppController>(this,&AppController::dim);
+	sleeper.setCallback(IApplicationContext::EnterSleepMode);
 	topLabel.setAlignment(TextLabelView::ALIGN_CENTER);
 }
 
@@ -56,13 +67,27 @@ void AppController::monoWakeFromReset ()
 
 void AppController::monoWakeFromSleep ()
 {
-	mono::IApplicationContext::SoftwareReset();
+	IApplicationContext::SoftwareReset();
 	startNewGame();
 }
 
 void AppController::monoWillGotoSleep ()
 {
 	timer.Stop();
+	dimmer.Stop();
+	sleeper.Stop();
+}
+
+void AppController::dim ()
+{
+	dimmer.Stop();
+	IDisplayController * display = IApplicationContext::Instance->DisplayController;
+	for (int i = display->Brightness(); i >= dimBrightness; --i)
+	{
+		display->setBrightness(i);
+		wait_ms(2);
+	}
+	sleeper.Start();
 }
 
 void AppController::startNewGame ()
@@ -102,6 +127,9 @@ void AppController::startNewGame ()
 
 void AppController::continueGame ()
 {
+	sleeper.Stop();
+	dimmer.Start();
+	IApplicationContext::Instance->DisplayController->setBrightness(255);
 	updateView();
 	whosMove();
 	if (hasWinner())

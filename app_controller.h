@@ -32,6 +32,8 @@ public:
 	Token board[3][3];
 private:
 	mono::Timer timer;
+    mono::Timer dimmer;
+    mono::Timer sleeper;
 	mono::ui::TextLabelView topLabel;
 	TouchField fields[3][3];
 	Token nextToMove;
@@ -44,6 +46,7 @@ private:
 	Token winner ();
 	bool hasWinner ();
 	void prepareNewGame ();
+	void dim ();
 };
 
 #endif // __ttt_appcontroller_h

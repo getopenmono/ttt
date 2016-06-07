@@ -139,3 +139,7 @@ void AppController::prepareNewGame ()
 
 And that is it!  Now you can let your friends try to beat Mono, and when
 they fail, you can tell them that *you* created this master mind.
+
+## Ready for some more?
+
+Check out the [third part](README3.md) of this tutorial.
