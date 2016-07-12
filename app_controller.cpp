@@ -17,25 +17,32 @@ namespace
 	static const int dimBrightness = 50;
 };
 
+const mono::display::Color TouchField::crossColor = mono::display::GreenColor;
+const mono::display::Color TouchField::circleColor = mono::display::BlueColor;
+
 void TouchField::repaint ()
 {
 	// Clear background.
+	painter.setBackgroundColor(StandardBackgroundColor);
 	painter.drawFillRect(viewRect,true);
 	// Show box around touch area.
+	painter.setForegroundColor(StandardBorderColor);
 	painter.drawRect(viewRect);
 	// Draw the game piece.
 	switch (app->board[boardY][boardX])
 	{
 		case AppController::X:
 		{
+			painter.setForegroundColor(crossColor);
 			painter.drawLine(Position(),Point(viewRect.X2(),viewRect.Y2()));
 			painter.drawLine(Point(viewRect.X2(),Position().Y()),Point(Position().X(),viewRect.Y2()));
 			break;
 		}
 		case AppController::O:
 		{
-			uint16_t radius = viewRect.Size().Width() / 2;
-			painter.drawCircle(Position().X()+radius,Position().Y()+radius,radius);
+			painter.setForegroundColor(circleColor);
+			uint16_t radius = (viewRect.Size().Width()-2) / 2;
+			painter.drawCircle(Position().X()+radius+1,Position().Y()+radius+1,radius);
 			break;
 		}
 		default:
@@ -67,7 +74,7 @@ void AppController::monoWakeFromReset ()
 
 void AppController::monoWakeFromSleep ()
 {
-	IApplicationContext::SoftwareReset();
+	IApplicationContext::SoftwareResetToApplication();
 	startNewGame();
 }
 

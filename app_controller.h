@@ -10,6 +10,9 @@ class TouchField
 :
 	public mono::ui::ResponderView
 {
+	static const mono::display::Color crossColor;
+	static const mono::display::Color circleColor;
+
 	void TouchBegin (mono::TouchEvent & event);
 	void repaint ();
 public:
