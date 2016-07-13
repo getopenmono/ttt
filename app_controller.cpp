@@ -74,8 +74,7 @@ void AppController::monoWakeFromReset ()
 
 void AppController::monoWakeFromSleep ()
 {
-	IApplicationContext::SoftwareResetToApplication();
-	startNewGame();
+	continueGame();
 }
 
 void AppController::monoWillGotoSleep ()
